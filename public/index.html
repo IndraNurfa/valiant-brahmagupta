@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OTP Lookup</title>
+    <meta
+      name="description"
+      content="Internal ops tool to look up a phone number's user role and retrieve the latest OTP code."
+    />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ── Design Tokens ─────────────────────────────────────────── */
+      :root {
+        --bg: #0f1117;
+        --surface: #181b24;
+        --surface-2: #1f2330;
+        --border: #2a2f3e;
+        --border-soft: #232838;
+        --text: #e8eaf0;
+        --text-muted: #7a8096;
+        --text-dim: #4b5168;
+        --accent: #4f6ef7;
+        --accent-glow: rgba(79, 110, 247, 0.18);
+        --accent-hover: #6680f9;
+        --success: #22c55e;
+        --success-bg: rgba(34, 197, 94, 0.08);
+        --warn: #f59e0b;
+        --warn-bg: rgba(245, 158, 11, 0.08);
+        --danger: #ef4444;
+        --danger-bg: rgba(239, 68, 68, 0.08);
+        --info: #38bdf8;
+        --info-bg: rgba(56, 189, 248, 0.08);
+        --radius: 12px;
+        --radius-sm: 8px;
+        --radius-xs: 6px;
+        --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+        --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* ── Reset & Base ──────────────────────────────────────────── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        height: 100%;
+      }
+
+      body {
+        min-height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 15px;
+        line-height: 1.6;
+        display: grid;
+        place-items: center;
+        padding: 2rem 1rem;
+        /* Subtle dot-grid texture */
+        background-image: radial-gradient(circle, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+        background-size: 28px 28px;
+      }
+
+      /* ── Card ──────────────────────────────────────────────────── */
+      .card {
+        width: 100%;
+        max-width: 480px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      /* ── Card Header ───────────────────────────────────────────── */
+      .card-header {
+        padding: 1.75rem 2rem 1.5rem;
+        border-bottom: 1px solid var(--border-soft);
+        background: linear-gradient(135deg, var(--surface) 0%, #1a1e2c 100%);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        margin-bottom: 0.375rem;
+      }
+
+      .brand-icon {
+        width: 32px;
+        height: 32px;
+        background: var(--accent);
+        border-radius: var(--radius-xs);
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+      }
+
+      .brand-icon svg {
+        width: 17px;
+        height: 17px;
+        fill: #fff;
+      }
+
+      .brand-name {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+
+      .card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.02em;
+      }
+
+      .card-subtitle {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+      }
+
+      /* ── Card Body ─────────────────────────────────────────────── */
+      .card-body {
+        padding: 1.75rem 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      /* ── Input Group ───────────────────────────────────────────── */
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .input-label {
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        letter-spacing: 0.01em;
+      }
+
+      .input-row {
+        display: flex;
+        gap: 0.625rem;
+      }
+
+      .phone-input {
+        flex: 1;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1rem;
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+        outline: none;
+        transition:
+          border-color var(--transition),
+          box-shadow var(--transition);
+        width: 100%;
+        letter-spacing: 0.02em;
+      }
+
+      .phone-input::placeholder {
+        color: var(--text-dim);
+      }
+
+      .phone-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-glow);
+      }
+
+      .check-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--accent);
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        padding: 0.75rem 1.25rem;
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition:
+          background var(--transition),
+          transform var(--transition),
+          box-shadow var(--transition);
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .check-btn:hover:not(:disabled) {
+        background: var(--accent-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(79, 110, 247, 0.35);
+      }
+
+      .check-btn:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      .check-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      .check-btn svg {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+        flex-shrink: 0;
+      }
+
+      /* ── Hint ──────────────────────────────────────────────────── */
+      .hint {
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        letter-spacing: 0.01em;
+      }
+
+      /* ── Spinner ───────────────────────────────────────────────── */
+      .spinner {
+        display: none;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.35);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        flex-shrink: 0;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ── Result Panel ──────────────────────────────────────────── */
+      .result-panel {
+        display: none;
+        flex-direction: column;
+        gap: 0.75rem;
+        animation: fadeSlideIn 0.3s ease both;
+      }
+
+      .result-panel.visible {
+        display: flex;
+      }
+
+      @keyframes fadeSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ── Result Row ────────────────────────────────────────────── */
+      .result-row {
+        background: var(--surface-2);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-sm);
+        padding: 1rem 1.125rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .result-row-label {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+      }
+
+      .result-row-value {
+        font-size: 0.9375rem;
+        font-weight: 500;
+        color: var(--text);
+      }
+
+      .result-row-value.mono {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.375rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+      }
+
+      .result-row-value.dim {
+        color: var(--text-muted);
+      }
+      .result-row-value.success {
+        color: var(--success);
+      }
+      .result-row-value.warn {
+        color: var(--warn);
+      }
+      .result-row-value.danger {
+        color: var(--danger);
+      }
+      .result-row-value.info {
+        color: var(--info);
+      }
+
+      /* ── OTP Block ─────────────────────────────────────────────── */
+      .otp-row {
+        border-color: var(--border-soft);
+        position: relative;
+      }
+
+      .otp-code-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+
+      .copy-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xs);
+        color: var(--text-muted);
+        font-family: 'Inter', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 0.3125rem 0.75rem;
+        cursor: pointer;
+        transition:
+          background var(--transition),
+          color var(--transition),
+          border-color var(--transition);
+        flex-shrink: 0;
+      }
+
+      .copy-btn:hover {
+        background: var(--accent-glow);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .copy-btn.copied {
+        border-color: var(--success);
+        color: var(--success);
+        background: var(--success-bg);
+      }
+
+      .copy-btn svg {
+        width: 13px;
+        height: 13px;
+        fill: currentColor;
+      }
+
+      .sent-at {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.125rem;
+        font-family: 'Inter', sans-serif;
+      }
+
+      /* ── Status Badge ──────────────────────────────────────────── */
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        padding: 0.3125rem 0.75rem;
+        border-radius: 100px;
+      }
+
+      .status-badge.success {
+        background: var(--success-bg);
+        color: var(--success);
+      }
+      .status-badge.warn {
+        background: var(--warn-bg);
+        color: var(--warn);
+      }
+      .status-badge.danger {
+        background: var(--danger-bg);
+        color: var(--danger);
+      }
+      .status-badge.info {
+        background: var(--info-bg);
+        color: var(--info);
+      }
+
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      /* ── Divider ───────────────────────────────────────────────── */
+      .divider {
+        height: 1px;
+        background: var(--border-soft);
+      }
+
+      /* ── Footer ────────────────────────────────────────────────── */
+      .card-footer {
+        padding: 0.875rem 2rem;
+        border-top: 1px solid var(--border-soft);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .footer-label {
+        font-size: 0.6875rem;
+        color: var(--text-dim);
+        letter-spacing: 0.05em;
+      }
+
+      .internal-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3125rem;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 100px;
+        padding: 0.25rem 0.625rem;
+      }
+
+      .internal-badge::before {
+        content: '';
+        display: block;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--warn);
+      }
+
+      /* ── CS message styling removed */
+
+      /* ── Responsive ────────────────────────────────────────────── */
+      @media (max-width: 520px) {
+        body {
+          padding: 1rem 0.75rem;
+        }
+        .card-header,
+        .card-body {
+          padding-left: 1.25rem;
+          padding-right: 1.25rem;
+        }
+        .card-footer {
+          padding-left: 1.25rem;
+          padding-right: 1.25rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <article class="card" aria-label="Phone Role and OTP Lookup Tool">
+        <!-- Header -->
+        <header class="card-header">
+          <div class="brand">
+            <div class="brand-icon" aria-hidden="true">
+              <!-- Phone icon -->
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"
+                />
+              </svg>
+            </div>
+            <span class="brand-name">Internal Tool</span>
+          </div>
+          <h1 class="card-title">Phone Lookup</h1>
+          <p class="card-subtitle">Look up user role &amp; retrieve the latest OTP</p>
+        </header>
+
+        <!-- Body -->
+        <div class="card-body">
+          <!-- Input -->
+          <div class="input-group">
+            <label class="input-label" for="phone-input">Phone Number</label>
+            <div class="input-row">
+              <input
+                id="phone-input"
+                class="phone-input"
+                type="tel"
+                placeholder="0812 345 6789"
+                autocomplete="off"
+                spellcheck="false"
+                aria-label="Enter phone number"
+              />
+              <button
+                id="check-btn"
+                class="check-btn"
+                type="button"
+                aria-label="Check phone number"
+              >
+                <span class="spinner" id="spinner" aria-hidden="true"></span>
+                <svg
+                  id="btn-icon"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+                  />
+                </svg>
+                <span id="btn-label">Check</span>
+              </button>
+            </div>
+            <p class="hint">Accepts: 0812…, 812…, 62812…, +62812…</p>
+          </div>
+
+          <!-- Result -->
+          <div
+            class="result-panel"
+            id="result-panel"
+            role="region"
+            aria-live="polite"
+            aria-label="Lookup Result"
+          >
+            <!-- Role Row -->
+            <div class="result-row" id="role-row">
+              <span class="result-row-label">User Role</span>
+              <span class="result-row-value" id="role-value" aria-label="Role result"></span>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- OTP Row -->
+            <div class="result-row otp-row" id="otp-row">
+              <span class="result-row-label">OTP Code</span>
+              <div class="otp-code-line">
+                <span
+                  class="result-row-value mono"
+                  id="otp-code-value"
+                  aria-label="OTP code"
+                ></span>
+                <button
+                  id="copy-btn"
+                  class="copy-btn"
+                  type="button"
+                  aria-label="Copy OTP code"
+                  style="display: none"
+                >
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path
+                      d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"
+                    />
+                  </svg>
+                  <span id="copy-label">Copy</span>
+                </button>
+              </div>
+              <p class="sent-at" id="sent-at" style="display: none" aria-label="OTP sent time"></p>
+            </div>
+          </div>
+        </div>
+        <!-- .card-body -->
+
+        <!-- Footer -->
+        <footer class="card-footer">
+          <span class="footer-label">VPN access required</span>
+          <span class="internal-badge">Internal Only</span>
+        </footer>
+      </article>
+    </main>
+
+    <script>
+      'use strict';
+
+      // ── Elements ──────────────────────────────────────────────────
+      const phoneInput = document.getElementById('phone-input');
+      const checkBtn = document.getElementById('check-btn');
+      const btnLabel = document.getElementById('btn-label');
+      const btnIcon = document.getElementById('btn-icon');
+      const spinner = document.getElementById('spinner');
+      const resultPanel = document.getElementById('result-panel');
+      const roleValue = document.getElementById('role-value');
+      const otpCodeValue = document.getElementById('otp-code-value');
+      const copyBtn = document.getElementById('copy-btn');
+      const copyLabel = document.getElementById('copy-label');
+      const sentAt = document.getElementById('sent-at');
+
+      // ── State ──────────────────────────────────────────────────────
+      let loading = false;
+      let currentOtp = null;
+      let currentCsMessage = null;
+      let copyTimeout = null;
+
+      // ── Helpers ────────────────────────────────────────────────────
+
+      function setLoading(on) {
+        loading = on;
+        checkBtn.disabled = on;
+        spinner.style.display = on ? 'block' : 'none';
+        btnIcon.style.display = on ? 'none' : 'block';
+        btnLabel.textContent = on ? 'Checking…' : 'Check';
+      }
+
+      /** Format an ISO date string for display. */
+      function formatSentAt(raw) {
+        if (!raw) return '';
+        try {
+          return new Date(raw).toLocaleString('id-ID', {
+            dateStyle: 'medium',
+            timeStyle: 'medium',
+            timeZone: 'Asia/Jakarta',
+          });
+        } catch (_) {
+          return raw;
+        }
+      }
+
+      let currentRoleLabel = null;
+      let currentCsMessage = null;
+
+      /** Render role value */
+      function renderRole(role_label) {
+        currentRoleLabel = role_label;
+        if (role_label) {
+          roleValue.textContent = role_label;
+          roleValue.className = 'result-row-value info';
+        } else {
+          roleValue.textContent = '—';
+          roleValue.className = 'result-row-value dim';
+        }
+      }
+
+      /** Render OTP section */
+      function renderOtp({ otp_code, sent_at, otp_failed }) {
+        currentOtp = null;
+
+        if (otp_failed) {
+          // Call itself failed
+          otpCodeValue.textContent = 'Failed to get OTP — try again';
+          otpCodeValue.className = 'result-row-value danger';
+          copyBtn.style.display = 'none';
+          sentAt.style.display = 'none';
+          return;
+        }
+
+        if (!otp_code) {
+          // Successful call but empty
+          otpCodeValue.textContent = 'Not Found';
+          otpCodeValue.className = 'result-row-value warn';
+          copyBtn.style.display = 'none';
+          sentAt.style.display = 'none';
+          return;
+        }
+
+        // Happy path — code present
+        currentOtp = otp_code;
+        otpCodeValue.textContent = otp_code;
+        otpCodeValue.className = 'result-row-value mono success';
+        copyBtn.style.display = 'inline-flex';
+
+        if (sent_at) {
+          sentAt.textContent = 'Sent ' + formatSentAt(sent_at);
+          sentAt.style.display = 'block';
+        } else {
+          sentAt.style.display = 'none';
+        }
+      }
+
+      // ── Copy OTP (+ CS message ONLY when role_label exists) ─────────
+      copyBtn.addEventListener('click', async () => {
+        if (!currentOtp) return;
+        const text = (currentRoleLabel && currentCsMessage)
+          ? currentOtp + '\n\n' + currentCsMessage
+          : currentOtp;
+        try {
+          await navigator.clipboard.writeText(text);
+          copyBtn.classList.add('copied');
+          copyLabel.textContent = 'Copied!';
+          clearTimeout(copyTimeout);
+          copyTimeout = setTimeout(() => {
+            copyBtn.classList.remove('copied');
+            copyLabel.textContent = 'Copy';
+          }, 2000);
+        } catch (err) {
+          console.warn('[Clipboard] Could not copy:', err);
+        }
+      });
+
+      // ── Check ──────────────────────────────────────────────────────
+      async function doCheck() {
+        const phone = phoneInput.value.trim();
+        if (!phone) {
+          phoneInput.focus();
+          return;
+        }
+        if (loading) return;
+
+        setLoading(true);
+        resultPanel.classList.remove('visible');
+
+        try {
+          const resp = await fetch('/api/check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone }),
+          });
+
+          if (!resp.ok) {
+            const body = await resp.json().catch(() => ({}));
+            throw new Error(body.error || `HTTP ${resp.status}`);
+          }
+
+          const data = await resp.json();
+          currentCsMessage = data.cs_message || null;
+          renderRole(data.role_label);
+          renderOtp(data);
+          resultPanel.classList.add('visible');
+        } catch (err) {
+          console.error('[Check] Error:', err);
+          // Show a generic failure in the OTP panel
+          renderRole(null);
+          renderOtp({ otp_code: null, sent_at: null, otp_failed: true });
+          resultPanel.classList.add('visible');
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      // ── Event Listeners ────────────────────────────────────────────
+      checkBtn.addEventListener('click', doCheck);
+
+      phoneInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') doCheck();
+      });
+
+      // Auto-focus input on load
+      phoneInput.focus();
+    </script>
+  </body>
+</html>

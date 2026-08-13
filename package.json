@@ -1,0 +1,21 @@
+{
+  "name": "phone-otp-lookup",
+  "version": "1.0.0",
+  "description": "Internal ops tool — phone role & OTP lookup",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mysql2": "^3.23.3",
+    "pino": "^10.3.1",
+    "pino-pretty": "^13.1.3"
+  }
+}
