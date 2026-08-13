@@ -36,14 +36,14 @@ async function check(req, res) {
     otp_failed:  otp.failed,
   }, 'Check request completed');
 
-  const cs_message = role_label ? (process.env.CS_LOGIN_MESSAGE || null) : null;
+  const login_instruction = role_label ? (process.env.LOGIN_INSTRUCTION_TEMPLATE || null) : null;
 
   return res.json({
     role_label,
     otp_code:   otp.otp_code,
     sent_at:    otp.sent_at,
     otp_failed: otp.failed,
-    cs_message,
+    login_instruction,
   });
 }
 

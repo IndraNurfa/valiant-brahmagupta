@@ -615,7 +615,8 @@
       // ── State ──────────────────────────────────────────────────────
       let loading = false;
       let currentOtp = null;
-      let currentCsMessage = null;
+      let currentRoleLabel = null;
+      let currentLoginInstruction = null;
       let copyTimeout = null;
 
       // ── Helpers ────────────────────────────────────────────────────
@@ -641,9 +642,6 @@
           return raw;
         }
       }
-
-      let currentRoleLabel = null;
-      let currentCsMessage = null;
 
       /** Render role value */
       function renderRole(role_label) {
@@ -693,11 +691,11 @@
         }
       }
 
-      // ── Copy OTP (+ CS message ONLY when role_label exists) ─────────
+      // ── Copy OTP (+ login instruction ONLY when role_label exists) ─────
       copyBtn.addEventListener('click', async () => {
         if (!currentOtp) return;
-        const text = (currentRoleLabel && currentCsMessage)
-          ? currentOtp + '\n\n' + currentCsMessage
+        const text = (currentRoleLabel && currentLoginInstruction)
+          ? currentOtp + '\n\n' + currentLoginInstruction
           : currentOtp;
         try {
           await navigator.clipboard.writeText(text);
@@ -738,7 +736,7 @@
           }
 
           const data = await resp.json();
-          currentCsMessage = data.cs_message || null;
+          currentLoginInstruction = data.login_instruction || null;
           renderRole(data.role_label);
           renderOtp(data);
           resultPanel.classList.add('visible');
