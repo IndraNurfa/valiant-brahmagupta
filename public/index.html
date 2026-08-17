@@ -4,43 +4,39 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OTP Lookup</title>
-    <meta
-      name="description"
-      content="Internal ops tool to look up a phone number's user role and retrieve the latest OTP code."
-    />
     <meta name="robots" content="noindex, nofollow" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@500;700&display=swap"
       rel="stylesheet"
     />
     <style>
       /* ── Design Tokens ─────────────────────────────────────────── */
       :root {
-        --bg: #0f1117;
-        --surface: #181b24;
-        --surface-2: #1f2330;
-        --border: #2a2f3e;
-        --border-soft: #232838;
-        --text: #e8eaf0;
-        --text-muted: #7a8096;
-        --text-dim: #4b5168;
-        --accent: #4f6ef7;
-        --accent-glow: rgba(79, 110, 247, 0.18);
-        --accent-hover: #6680f9;
-        --success: #22c55e;
-        --success-bg: rgba(34, 197, 94, 0.08);
-        --warn: #f59e0b;
-        --warn-bg: rgba(245, 158, 11, 0.08);
-        --danger: #ef4444;
-        --danger-bg: rgba(239, 68, 68, 0.08);
-        --info: #38bdf8;
-        --info-bg: rgba(56, 189, 248, 0.08);
+        --bg: #18181a;
+        --surface: #222224;
+        --surface-2: #2b2b2d;
+        --border: #38383a;
+        --border-soft: #323234;
+        --text: #f0ede8;
+        --text-muted: #a09a90;
+        --text-dim: #6b6560;
+        --accent: #c49a3c;
+        --accent-glow: rgba(196, 154, 60, 0.15);
+        --accent-hover: #c49a3c;
+        --success: #6ab86a;
+        --success-bg: rgba(106, 184, 106, 0.08);
+        --warn: #c8a84a;
+        --warn-bg: rgba(200, 168, 74, 0.08);
+        --danger: #d47070;
+        --danger-bg: rgba(212, 112, 112, 0.08);
+        --info: #7eaed4;
+        --info-bg: rgba(126, 174, 212, 0.08);
         --radius: 12px;
         --radius-sm: 8px;
         --radius-xs: 6px;
-        --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+        --shadow: 0 4px 24px rgba(0, 0, 0, 0.55);
         --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
@@ -61,15 +57,13 @@
         min-height: 100%;
         background: var(--bg);
         color: var(--text);
-        font-family: 'Inter', system-ui, sans-serif;
+        font-family: 'DM Sans', system-ui, sans-serif;
         font-size: 15px;
         line-height: 1.6;
         display: grid;
         place-items: center;
         padding: 2rem 1rem;
-        /* Subtle dot-grid texture */
-        background-image: radial-gradient(circle, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-        background-size: 28px 28px;
+        background-image: none;
       }
 
       /* ── Card ──────────────────────────────────────────────────── */
@@ -87,7 +81,7 @@
       .card-header {
         padding: 1.75rem 2rem 1.5rem;
         border-bottom: 1px solid var(--border-soft);
-        background: linear-gradient(135deg, var(--surface) 0%, #1a1e2c 100%);
+        background: var(--surface);
       }
 
       .brand {
@@ -100,7 +94,7 @@
       .brand-icon {
         width: 32px;
         height: 32px;
-        background: var(--accent);
+        background: var(--surface-2);
         border-radius: var(--radius-xs);
         display: grid;
         place-items: center;
@@ -110,7 +104,7 @@
       .brand-icon svg {
         width: 17px;
         height: 17px;
-        fill: #fff;
+        fill: var(--accent);
       }
 
       .brand-name {
@@ -167,7 +161,7 @@
         border: 1px solid var(--border);
         border-radius: var(--radius-sm);
         color: var(--text);
-        font-family: 'JetBrains Mono', monospace;
+        font-family: 'DM Mono', monospace;
         font-size: 1rem;
         font-weight: 500;
         padding: 0.75rem 1rem;
@@ -193,8 +187,8 @@
         align-items: center;
         gap: 0.5rem;
         background: var(--accent);
-        color: #fff;
-        font-family: 'Inter', sans-serif;
+        color: #18181a;
+        font-family: 'DM Sans', sans-serif;
         font-size: 0.9375rem;
         font-weight: 600;
         padding: 0.75rem 1.25rem;
@@ -207,12 +201,6 @@
           box-shadow var(--transition);
         white-space: nowrap;
         flex-shrink: 0;
-      }
-
-      .check-btn:hover:not(:disabled) {
-        background: var(--accent-hover);
-        transform: translateY(-1px);
-        box-shadow: 0 6px 20px rgba(79, 110, 247, 0.35);
       }
 
       .check-btn:active:not(:disabled) {
@@ -348,22 +336,12 @@
         border: 1px solid var(--border);
         border-radius: var(--radius-xs);
         color: var(--text-muted);
-        font-family: 'Inter', sans-serif;
+        font-family: 'DM Sans', sans-serif;
         font-size: 0.75rem;
         font-weight: 500;
         padding: 0.3125rem 0.75rem;
         cursor: pointer;
-        transition:
-          background var(--transition),
-          color var(--transition),
-          border-color var(--transition);
         flex-shrink: 0;
-      }
-
-      .copy-btn:hover {
-        background: var(--accent-glow);
-        border-color: var(--accent);
-        color: var(--accent);
       }
 
       .copy-btn.copied {
@@ -382,7 +360,7 @@
         font-size: 0.75rem;
         color: var(--text-muted);
         margin-top: 0.125rem;
-        font-family: 'Inter', sans-serif;
+        font-family: 'DM Sans', sans-serif;
       }
 
       /* ── Status Badge ──────────────────────────────────────────── */
@@ -426,46 +404,163 @@
         background: var(--border-soft);
       }
 
-      /* ── Footer ────────────────────────────────────────────────── */
-      .card-footer {
-        padding: 0.875rem 2rem;
-        border-top: 1px solid var(--border-soft);
+      /* ── CS message styling removed */
+
+      /* ── Save row ───────────────────────────────────────── */
+      .save-row {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        gap: 0.375rem;
       }
 
-      .footer-label {
-        font-size: 0.6875rem;
-        color: var(--text-dim);
-        letter-spacing: 0.05em;
-      }
-
-      .internal-badge {
-        display: inline-flex;
+      .form-bottom {
+        display: flex;
         align-items: center;
-        gap: 0.3125rem;
+        gap: 0.75rem;
+        margin-top: 0.375rem;
+      }
+
+      .save-row input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+        accent-color: var(--accent);
+        cursor: pointer;
+        margin: 0;
+      }
+
+      .save-row label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-weight: 400;
+      }
+
+      .save-row input[type="checkbox"]:disabled,
+      .save-row input[type="checkbox"]:disabled + label {
+        opacity: 0.5;
+        cursor: default;
+      }
+
+      /* ── Saved numbers ────────────────────────────────────────── */
+      .saved-section {
+        margin-top: 0.75rem;
+      }
+
+      .saved-label {
         font-size: 0.6875rem;
         font-weight: 600;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
         color: var(--text-dim);
+        margin-bottom: 0.4rem;
+      }
+
+      .saved-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .saved-entry {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
         background: var(--surface-2);
         border: 1px solid var(--border);
-        border-radius: 100px;
+        border-radius: var(--radius-sm);
+        padding: 0.4375rem 0.625rem;
+        flex-wrap: wrap;
+      }
+
+      .saved-fill {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        cursor: pointer;
+        min-width: 0;
+      }
+
+      .saved-alias {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .saved-phone {
+        font-family: 'DM Mono', monospace;
+        font-size: 0.725rem;
+        color: var(--text-muted);
+      }
+
+      .saved-phone-only {
+        font-family: 'DM Mono', monospace;
+        font-size: 0.8125rem;
+        color: var(--text);
+      }
+
+      .saved-icon-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--text-dim);
+      }
+
+      .saved-icon-btn svg {
+        width: 13px;
+        height: 13px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .saved-icon-btn.delete svg { stroke: var(--danger); }
+      .saved-icon-btn.edit svg   { stroke: var(--text-dim); }
+
+      .alias-edit-row {
+        width: 100%;
+        display: flex;
+        gap: 0.3125rem;
+        align-items: center;
+        margin-top: 0.3rem;
+      }
+
+      .alias-input {
+        flex: 1;
+        background: var(--surface);
+        border: 1px solid var(--accent);
+        border-radius: 4px;
+        color: var(--text);
+        font-family: 'DM Sans', system-ui, sans-serif;
+        font-size: 0.8125rem;
+        padding: 0.25rem 0.5rem;
+        outline: none;
+      }
+
+      .alias-save-btn {
+        background: var(--accent);
+        border: none;
+        border-radius: 4px;
+        color: #18181a;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 600;
         padding: 0.25rem 0.625rem;
+        cursor: pointer;
+        white-space: nowrap;
       }
-
-      .internal-badge::before {
-        content: '';
-        display: block;
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: var(--warn);
-      }
-
-      /* ── CS message styling removed */
 
       /* ── Responsive ────────────────────────────────────────────── */
       @media (max-width: 520px) {
@@ -474,10 +569,6 @@
         }
         .card-header,
         .card-body {
-          padding-left: 1.25rem;
-          padding-right: 1.25rem;
-        }
-        .card-footer {
           padding-left: 1.25rem;
           padding-right: 1.25rem;
         }
@@ -539,7 +630,19 @@
                 <span id="btn-label">Check</span>
               </button>
             </div>
-            <p class="hint">Accepts: 0812…, 812…, 62812…, +62812…</p>
+            <div class="form-bottom">
+              <p class="hint">Accepts: 0812…, 812…, 62812…, +62812…</p>
+              <div class="save-row">
+                <input type="checkbox" id="save-cb">
+                <label for="save-cb">Save</label>
+              </div>
+            </div>
+
+            <!-- Saved numbers -->
+            <div class="saved-section" id="saved-section" style="display:none">
+              <div class="saved-label">Saved</div>
+              <div class="saved-list" id="saved-list"></div>
+            </div>
           </div>
 
           <!-- Result -->
@@ -588,11 +691,6 @@
         </div>
         <!-- .card-body -->
 
-        <!-- Footer -->
-        <footer class="card-footer">
-          <span class="footer-label">VPN access required</span>
-          <span class="internal-badge">Internal Only</span>
-        </footer>
       </article>
     </main>
 
@@ -600,17 +698,151 @@
       'use strict';
 
       // ── Elements ──────────────────────────────────────────────────
-      const phoneInput = document.getElementById('phone-input');
-      const checkBtn = document.getElementById('check-btn');
-      const btnLabel = document.getElementById('btn-label');
-      const btnIcon = document.getElementById('btn-icon');
-      const spinner = document.getElementById('spinner');
-      const resultPanel = document.getElementById('result-panel');
-      const roleValue = document.getElementById('role-value');
+      const phoneInput   = document.getElementById('phone-input');
+      const checkBtn     = document.getElementById('check-btn');
+      const btnLabel     = document.getElementById('btn-label');
+      const btnIcon      = document.getElementById('btn-icon');
+      const spinner      = document.getElementById('spinner');
+      const resultPanel  = document.getElementById('result-panel');
+      const roleValue    = document.getElementById('role-value');
       const otpCodeValue = document.getElementById('otp-code-value');
-      const copyBtn = document.getElementById('copy-btn');
-      const copyLabel = document.getElementById('copy-label');
-      const sentAt = document.getElementById('sent-at');
+      const copyBtn      = document.getElementById('copy-btn');
+      const copyLabel    = document.getElementById('copy-label');
+      const sentAt       = document.getElementById('sent-at');
+      const savedSection = document.getElementById('saved-section');
+      const savedList    = document.getElementById('saved-list');
+
+      // ── Saved numbers (localStorage) ─────────────────────────────
+      const STORAGE_KEY = 'saved_phones';
+      const MAX_SAVED   = 5;
+
+      function loadSaved() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+        catch (_) { return []; }
+      }
+
+      function persistSaved(list) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      }
+
+      function normalizePhone(raw) {
+        let num = String(raw).trim().replace(/[-\s]/g, '');
+        if (num.startsWith('+62')) return '62' + num.slice(3);
+        if (num.startsWith('62'))  return num;
+        if (num.startsWith('0'))   return '62' + num.slice(1);
+        return '62' + num;
+      }
+
+      function savePhone(rawInput) {
+        const normalized = normalizePhone(rawInput);
+        let list = loadSaved();
+        if (list.find(function(e) { return e.phone === normalized; })) {
+          renderSaved(); return;
+        }
+        if (list.length >= MAX_SAVED) list.shift();
+        list.push({ phone: normalized, alias: '', savedAt: new Date().toISOString() });
+        persistSaved(list);
+        renderSaved();
+      }
+
+      function deletePhone(normalized) {
+        persistSaved(loadSaved().filter(function(e) { return e.phone !== normalized; }));
+        renderSaved();
+      }
+
+      function saveAlias(normalized, alias) {
+        const list = loadSaved().map(function(e) {
+          return e.phone === normalized ? Object.assign({}, e, { alias: alias.trim() }) : e;
+        });
+        persistSaved(list);
+        renderSaved();
+      }
+
+      function renderSaved() {
+        const list = loadSaved();
+        savedSection.style.display = list.length ? 'block' : 'none';
+        savedList.innerHTML = '';
+
+        list.forEach(function(entry) {
+          const row = document.createElement('div');
+          row.className = 'saved-entry';
+
+          const fillEl = document.createElement('div');
+          fillEl.className = 'saved-fill';
+          fillEl.title = 'Click to fill';
+
+          if (entry.alias) {
+            const aliasEl = document.createElement('span');
+            aliasEl.className = 'saved-alias';
+            aliasEl.textContent = entry.alias;
+            fillEl.appendChild(aliasEl);
+            const phoneEl = document.createElement('span');
+            phoneEl.className = 'saved-phone';
+            phoneEl.textContent = entry.phone;
+            fillEl.appendChild(phoneEl);
+          } else {
+            const phoneEl = document.createElement('span');
+            phoneEl.className = 'saved-phone-only';
+            phoneEl.textContent = entry.phone;
+            fillEl.appendChild(phoneEl);
+          }
+
+          fillEl.addEventListener('click', function() {
+            phoneInput.value = entry.phone;
+            phoneInput.focus();
+          });
+
+          // Edit alias button
+          const editBtn = document.createElement('button');
+          editBtn.className = 'saved-icon-btn edit';
+          editBtn.type = 'button';
+          editBtn.title = 'Set alias';
+          editBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+          editBtn.addEventListener('click', function(ev) {
+            ev.stopPropagation();
+            const existing = row.querySelector('.alias-edit-row');
+            if (existing) { existing.remove(); return; }
+            const editRow = document.createElement('div');
+            editRow.className = 'alias-edit-row';
+            const inp = document.createElement('input');
+            inp.className = 'alias-input';
+            inp.type = 'text';
+            inp.maxLength = 32;
+            inp.placeholder = 'e.g. John Doe';
+            inp.value = entry.alias || '';
+            const saveBtn = document.createElement('button');
+            saveBtn.className = 'alias-save-btn';
+            saveBtn.type = 'button';
+            saveBtn.textContent = 'Save';
+            saveBtn.addEventListener('click', function() {
+              saveAlias(entry.phone, inp.value);
+            });
+            inp.addEventListener('keydown', function(e) {
+              if (e.key === 'Enter') saveAlias(entry.phone, inp.value);
+              if (e.key === 'Escape') editRow.remove();
+            });
+            editRow.appendChild(inp);
+            editRow.appendChild(saveBtn);
+            row.appendChild(editRow);
+            inp.focus();
+          });
+
+          // Delete button
+          const delBtn = document.createElement('button');
+          delBtn.className = 'saved-icon-btn delete';
+          delBtn.type = 'button';
+          delBtn.title = 'Remove';
+          delBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
+          delBtn.addEventListener('click', function() {
+            deletePhone(entry.phone);
+          });
+
+          row.appendChild(fillEl);
+          row.appendChild(editBtn);
+          row.appendChild(delBtn);
+          savedList.appendChild(row);
+        });
+      }
 
       // ── State ──────────────────────────────────────────────────────
       let loading = false;
@@ -740,6 +972,12 @@
           renderRole(data.role_label);
           renderOtp(data);
           resultPanel.classList.add('visible');
+          // Save if checkbox is checked
+          const saveCb = document.getElementById('save-cb');
+          if (saveCb && saveCb.checked) {
+            savePhone(phone);
+            saveCb.checked = false;
+          }
         } catch (err) {
           console.error('[Check] Error:', err);
           // Show a generic failure in the OTP panel
@@ -760,6 +998,7 @@
 
       // Auto-focus input on load
       phoneInput.focus();
+      renderSaved();
     </script>
   </body>
 </html>
